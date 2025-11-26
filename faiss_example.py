@@ -29,7 +29,7 @@ def embed_data(csv_file):
     return embeddings, ids, df, model
 
 # Шаг 2: Построение индекса FAISS
-def build_faiss_index(embeddings):
+def build_faiss_index(embeddings, df):
     """Построить индекс FAISS из векторов-эмбеддингов"""
     embeddings = embeddings.astype('float32')
     

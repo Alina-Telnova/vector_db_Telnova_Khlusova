@@ -10,7 +10,7 @@ embeddings, ids, df, model = embed_data(csv_file)
 # Строим TF-IDF матрицу
 tfidf_matrix = build_tfidf_index(tfidf_matrix, df)
 # Строим индекс FAISS
-index = build_faiss_index(embeddings)
+index = build_faiss_index(embeddings, df)
 
 # Простой поиск через input
 search_query = input("\nВведите слово для поиска: ")
