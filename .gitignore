@@ -2,6 +2,9 @@
 models/
 .venv/
 
+# python-generated files
+__pycache__/
+
 # uv-generated files
 .python-version
 
