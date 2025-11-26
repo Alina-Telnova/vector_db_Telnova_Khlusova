@@ -1,0 +1,11 @@
+[project]
+name = "vector-db-telnova-khlusova"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "faiss-cpu>=1.13.0",
+    "pandas>=2.3.3",
+    "sentence-transformers>=5.1.2",
+]

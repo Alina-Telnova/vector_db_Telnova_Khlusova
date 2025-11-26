@@ -3,16 +3,21 @@ import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
+from common_utils import prepare_vectors
+
 # Шаг 1: Загрузка и подготовка данных из CSV
-def load_data_from_csv(csv_file):
-    """Загрузить данные из CSV файла и подготовить для TF-IDF"""
-    df = pd.read_csv(csv_file)
+def vectorize_data(csv_file):
+    """Подготовить данные для TF-IDF"""
     
     # Создаем TF-IDF векторизатор и матрицу
     vectorizer = TfidfVectorizer()
-    tfidf_matrix = vectorizer.fit_transform(df['text'].tolist())
     
-    ids = df['id'].values
+    tfidf_matrix, ids, df, _ = prepare_vectors(
+        csv_file=csv_file,
+        vectorizer_factory=vectorizer,
+        text_column='text',
+        id_column='id'
+    )
     
     return tfidf_matrix, ids, df, vectorizer
 
@@ -60,28 +65,3 @@ def search_similar_texts(tfidf_matrix, query_vector, k=5, ids=None, original_df=
         results.append(result)
     
     return results
-
-if __name__ == "__main__":
-    csv_file = "data.csv"
-    
-    # Загружаем данные из CSV
-    tfidf_matrix, ids, df, vectorizer = load_data_from_csv(csv_file)
-    
-    # Строим TF-IDF матрицу
-    tfidf_matrix = build_tfidf_index(tfidf_matrix, df)
-    
-    # Простой поиск через input
-    search_query = input("\nВведите слово для поиска: ")
-    
-    # Преобразуем запрос в TF-IDF вектор
-    query_vector = vectorizer.transform([search_query])
-    
-    # Выполняем поиск
-    results = search_similar_texts(tfidf_matrix, query_vector, k=3, ids=ids, original_df=df)
-    
-    print(f"\nТоп-3 для запроса '{search_query}':")
-    for result in results:
-        data = result['data']
-        print(f"{result['rank']}. ID: {data['id']}, Дата: {data['date']}")
-        print(f"   Текст: {data['text'][:50]}")
-        print(f"   Сходство: {result['similarity']:.8f}\n")

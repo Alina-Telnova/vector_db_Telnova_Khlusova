@@ -1,0 +1,9 @@
+# directories
+models/
+.venv/
+
+# uv-generated files
+.python-version
+
+# scripts
+check_classes.py

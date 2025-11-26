@@ -3,20 +3,29 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 import faiss
 
+from common_utils import prepare_vectors
+
+
 # Шаг 1: Загрузка и подготовка данных из CSV
-def load_data_from_csv(csv_file):
-    """Загрузить данные из CSV файла и подготовить для индексации FAISS"""
-    df = pd.read_csv(csv_file)
+def embed_data(csv_file):
+    """Подготовка данных для индексации FAISS"""
     
     # Загружаем предобученный энкодер
-    model = SentenceTransformer('all-MiniLM-L6-v2')
+    model = SentenceTransformer('cointegrated/LaBSE-en-ru')
+    # это урезанная версия LaBSE, сохранившая только русские и английские токены
 
     # Создаем эмбеддинги для всех текстов
-    embeddings = model.encode(df['text'].tolist(), show_progress_bar=True)
-    embeddings = embeddings.astype('float32')
-    
-    ids = df['id'].values
-    
+    def encode_fn(texts):
+        emb = model.encode(texts, show_progress_bar=True)
+        return emb.astype('float32')
+
+    embeddings, ids, df, _ = prepare_vectors(
+        csv_file=csv_file,
+        vectorizer_factory=encode_fn,
+        text_column='text',
+        id_column='id'
+    )
+
     return embeddings, ids, df, model
 
 # Шаг 2: Построение индекса FAISS
@@ -62,28 +71,3 @@ def search_similar_vectors(index, query_vector, k=5, ids=None, original_df=None)
             results.append(result)
     
     return results
-
-if __name__ == "__main__":
-    csv_file = "data.csv"
-    
-    # Загружаем данные из CSV
-    embeddings, ids, df, model = load_data_from_csv(csv_file)
-    
-    # Строим индекс FAISS
-    index = build_faiss_index(embeddings)
-    
-    # Простой поиск через input
-    search_query = input("\nВведите слово для поиска: ")
-    
-    # Создаем эмбеддинг для запроса
-    query_embedding = model.encode([search_query]).astype('float32')
-    
-    # Выполняем поиск
-    results = search_similar_vectors(index, query_embedding, k=3, ids=ids, original_df=df)
-    
-    print(f"\nТоп-3 для запроса '{search_query}':")
-    for result in results:
-        data = result['data']
-        print(f"{result['rank']}. ID: {data['id']}, Дата: {data['date']}")
-        print(f"   Текст: {data['text']}")
-        print(f"   Сходство: {result['similarity']:.4f}\n")
